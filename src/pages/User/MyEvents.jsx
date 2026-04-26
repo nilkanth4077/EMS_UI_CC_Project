@@ -1,214 +1,153 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Navbar from "../../components/Navbar";
-import { Footer } from "../../components/Footer";
 import BaseUrl from "../../reusables/BaseUrl";
-import { triggerRoomDetails } from "../../services/doctorApi";
+import { Footer } from "../../components/Footer";
+import Navbar from "../../components/Navbar";
 
-const MyEvents = () => {
-    const navigate = useNavigate();
-    const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingId, setLoadingId] = useState(null);
+const formatDate = (date) =>
+  new Date(date).toLocaleString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
-    const token = localStorage.getItem("token");
+const EventCard = ({ event, type }) => {
+  const isPast = type === "past";
 
-    const formatTime = (dateStr) => {
-        if (!dateStr) return "";
-        const [hourStr, minute] = dateStr.substring(11, 16).split(":");
-        let hour = parseInt(hourStr, 10);
-        const ampm = hour >= 12 ? "PM" : "AM";
-        hour = hour % 12 || 12;
-        return `${hour}:${minute} ${ampm}`;
-    };
+  return (
+    <div className={`rounded-xl border p-4 shadow-sm transition 
+        ${isPast ? "bg-slate-100 opacity-80" : "bg-white hover:shadow-md"}`}>
 
-    const isSlotActive = (slot) => {
-        const now = new Date();
-        const start = new Date(slot.startTime);
-        const end = new Date(slot.endTime);
+      <img
+        src={event?.thumbnail}
+        alt={event?.title}
+        className="w-full h-40 object-cover rounded-lg mb-3"
+      />
 
-        return now >= start && now <= end;
-    };
+      <h3 className="font-bold text-slate-900">{event?.title}</h3>
 
-    const handleClick = async (event) => {
-        setLoadingId(event.eventId);
+      <p className="text-sm text-slate-500 mt-1">
+        📍 {event?.location}
+      </p>
 
-        try {
-            const existingMeetDetails = await axios.get(
-                `${BaseUrl}/zoom/meet-details?appointmentId=${appointment.appointmentId}`
-            ).catch((err) => err.response);
+      <p className="text-sm text-slate-500">
+        📅 {formatDate(event?.date)}
+      </p>
 
-            const meet = existingMeetDetails?.data?.data;
+      <div className="mt-3 flex justify-between items-center">
+        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-indigo-50 text-indigo-600">
+          {event?.type}
+        </span>
 
-            if (meet && (meet.startUrl || meet.joinUrl)) {
-                window.open(meet.startUrl ?? meet.joinUrl, "_blank");
-                return;
-            }
+        <span className="text-xs text-slate-500">
+          {event?.price === 0 ? "Free" : `₹${event?.price}`}
+        </span>
+      </div>
 
-            const now = new Date();
-            const start = new Date(`${appointment.startTime}`);
-            const end = new Date(`${appointment.endTime}`);
-
-            if (!(now >= start && now <= end)) {
-                toast.error("Meeting is not allowed at this time", { autoClose: 2000 });
-                return;
-            }
-
-            toast.warn("Doctor has not started the meeting yet", { autoClose: 2000 });
-            return;
-
-        } catch (error) {
-            console.log(error);
-            toast.error("Something went wrong");
-        } finally {
-            setLoadingId(null);
-        }
-    };
-
-    useEffect(() => {
-
-        if (!token) {
-            toast.error("Please login first !!");
-            navigate("/login");
-            return;
-        }
-
-        axios
-            .get(`${BaseUrl}/user/booked/appointments`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                if (response.data && response.data.data) {
-                    setEvents(response.data.data);
-                    // console.log("Events: ", response.data.data)
-                } else {
-                    toast.error("Unexpected response format");
-                }
-            })
-            .catch((error) => {
-                console.error("Error fetching appointments: ", error);
-                toast.error("Failed to fetch appointments");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
-
-    return (
-        <>
-            <Navbar />
-            <div>
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-10">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-primary border-solid"></div>
-                        <p className="mt-4 text-gray-600 font-medium">
-                            Fetching your events, please wait...
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        {events.length === 0 ? (
-                            <div className="text-center py-5">
-                                <p className="font-medium">You do not have any events</p>
-                                <button
-                                    onClick={() => navigate("/book-appointment")}
-                                    className="mt-2 px-3 py-2 rounded-xl font-medium bg-back text-secondary hover:bg-primary hover:text-back"
-                                >
-                                    Book Event
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 bg-back">
-                                    {events.map((eventWrapper) => (
-                                        <div
-                                            key={eventWrapper.eventId}
-                                            className="bg-white shadow-md rounded-2xl p-6 flex flex-col justify-between hover:shadow-lg transition"
-                                        >
-                                            <div>
-                                                <h2 className="text-xl font-semibold text-gray-800">
-                                                    Appointment Id: {eventWrapper.eventId}
-                                                </h2>
-                                                <span
-                                                    className={`inline-block my-2 px-3 py-1 rounded-full text-sm font-medium ${eventWrapper.appointmentStatus === "BOOKED"
-                                                        ? "bg-green-100 text-green-700"
-                                                        : "bg-yellow-100 text-yellow-700"
-                                                        }`}
-                                                >
-                                                    {eventWrapper.appointmentStatus}
-                                                </span>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>{eventWrapper.doctorFirstName} {eventWrapper.doctorLastName}</b> ({eventWrapper.specialization})
-                                                </p>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>Date:</b> {eventWrapper.startTime.toString().substring(0, 10).split("-").reverse().join("-")}
-                                                </p>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>Slot:</b>{" "}
-                                                    {formatTime(eventWrapper.startTime)} - {" "}
-                                                    {formatTime(eventWrapper.endTime)}
-                                                </p>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>Type:</b> {eventWrapper.slotType}
-                                                </p>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>Email:</b> {eventWrapper.doctorEmail}
-                                                </p>
-                                                <p className="text-md text-gray-600 mt-1">
-                                                    <b>Mobile:</b> {eventWrapper.doctorMobile}
-                                                </p>
-                                            </div>
-
-                                            {/* <button
-                                                className={`mt-4 py-2 px-4 rounded-lg text-sm font-medium transition 
-                                                ${eventWrapper.slotType === "ONLINE" && isSlotActive(eventWrapper)
-                                                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                                    }`}
-                                                disabled={eventWrapper.slotType !== "ONLINE" || !isSlotActive(eventWrapper)}
-                                                onClick={() => handleClick(eventWrapper.appointmentId)}
-                                            >
-                                                Start Video Call
-                                            </button> */}
-
-                                            <button
-                                                className={`mt-4 py-2 px-4 rounded-lg text-sm font-medium transition flex justify-center items-center gap-2
-                                                    ${eventWrapper.slotType === "ONLINE" && "bg-blue-600 text-white hover:bg-blue-700"
-                                                    }`}
-                                                // disabled={
-                                                //     eventWrapper.slotType !== "ONLINE" ||
-                                                //     !isSlotActive(eventWrapper) ||
-                                                //     loadingId === eventWrapper.appointmentId
-                                                // }
-                                                onClick={() =>
-                                                    handleClick(eventWrapper)
-                                                }
-                                            >
-                                                {loadingId === eventWrapper.appointmentId ? (
-                                                    <>
-                                                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
-                                                        Redirecting...
-                                                    </>
-                                                ) : (
-                                                    "Start Call"
-                                                )}
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </>
-                )}
-            </div >
-
-            <Footer />
-        </>
-    );
+      {isPast && (
+        <p className="text-xs text-red-500 mt-2 font-semibold">
+          Event Completed
+        </p>
+      )}
+    </div>
+  );
 };
 
-export default MyEvents;
+export default function MyEvents() {
+
+  const [upcoming, setUpcoming] = useState([]);
+  const [past, setPast] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMyEvents = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${BaseUrl}/user/my-events`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data.statusCode === 200) {
+        setUpcoming(res.data.data.upcoming || []);
+        setPast(res.data.data.past || []);
+      } else {
+        toast.error(res.data.message);
+      }
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch your events");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-slate-500">
+        Loading your events...
+      </div>
+    );
+  }
+
+  return (
+    <>
+    <Navbar />
+    <div className="min-h-screen bg-slate-50 px-4 sm:px-8 py-10">
+
+      {/* HEADER */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-slate-900">My Events</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Your registrations and activity
+        </p>
+      </div>
+
+      {/* UPCOMING */}
+      <section className="mb-10">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">
+          🎟️ Registered & Upcoming
+        </h2>
+
+        {upcoming.length === 0 ? (
+          <p className="text-slate-400 text-sm">No upcoming events</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {upcoming.map((event) => (
+              <EventCard key={event.id} event={event} type="upcoming" />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* HISTORY */}
+      <section>
+        <h2 className="text-xl font-bold text-slate-800 mb-4">
+          📜 Event History
+        </h2>
+
+        {past.length === 0 ? (
+          <p className="text-slate-400 text-sm">No past events</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {past.map((event) => (
+              <EventCard key={event.id} event={event} type="past" />
+            ))}
+          </div>
+        )}
+      </section>
+
+    </div>
+    <Footer />
+    </>
+  );
+}

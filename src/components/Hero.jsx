@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllEvents } from "../services/doctorApi";
+import { Footer } from "./Footer";
 
 // const MOCK_EVENTS = [
 //   {
@@ -195,12 +196,25 @@ function EventCard({ event, featured = false }) {
           </div>
         </div>
 
-        <button className={`mt-4 w-full flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200
-          ${featured
-            ? "py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
-            : "py-2.5 bg-slate-50 hover:bg-indigo-600 hover:text-white text-slate-700 text-sm border border-slate-200 hover:border-indigo-600"
-          }`}
-          onClick={handleRegister}
+        <button
+          className={`mt-4 w-full flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200
+            ${featured
+              ? "py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
+              : "py-2.5 bg-slate-50 hover:bg-indigo-600 hover:text-white text-slate-700 text-sm border border-slate-200 hover:border-indigo-600"
+            }`}
+          onClick={() => {
+            const token = localStorage.getItem("token");
+
+            if (token) {
+              navigate(`/events/${event.id}`, {
+                state: { event }
+              });
+            } else {
+              navigate("/login", {
+                state: { from: `/events/${event.id}` } // 👈 so you can redirect back after login
+              });
+            }
+          }}
         >
           Register now
           <ArrowRightIcon />
@@ -258,6 +272,7 @@ export default function Hero() {
   });
 
   return (
+    <>
     <div className="min-h-screen bg-slate-50 font-sans border-8 border-slate-100">
 
       {/* Hero */}
@@ -499,5 +514,7 @@ export default function Hero() {
         </div>
       </section>
     </div>
+    <Footer />
+    </>
   );
 }

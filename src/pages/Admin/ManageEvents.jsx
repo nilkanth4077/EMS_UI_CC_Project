@@ -27,6 +27,7 @@ const ManageEvents = () => {
         const response = await getAllEvents();
         if (Array.isArray(response)) {
           setEvents(response);
+          console.log("Fetched events:", response);
         } else if (response?.statusCode === 200) {
           setEvents(response.data ?? []);
         } else {
@@ -58,6 +59,7 @@ const ManageEvents = () => {
       );
     }
     setFiltered(result);
+    console.log("Filtered events:", result);
   }, [activeTab, search, events]);
 
   const counts = {

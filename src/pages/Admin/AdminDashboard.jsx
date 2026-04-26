@@ -21,7 +21,7 @@ const AdminDashboard = () => {
                         onClick={() => setSidebarOpen(!sidebarOpen)}
                         className="fixed top-1/2 -translate-y-1/2 rounded-lg bg-back size-7 text-white z-50"
                     >
-                        <span className="text-sm">
+                        <span className="text-sm text-primary">
                             {sidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                         </span>
                     </button>
