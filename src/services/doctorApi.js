@@ -5,7 +5,7 @@ import BaseUrl from "../reusables/BaseUrl";
 export const getAllEvents = async () => {
     try {
       const response = await axios.get(`${BaseUrl}/events`);
-      console.log("Events from API: ", response.data);
+    //   console.log("Events from API: ", response.data);
       return response.data;
     } catch (error) {
       throw error;

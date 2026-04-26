@@ -3,56 +3,56 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllEvents } from "../services/doctorApi";
 
-const MOCK_EVENTS = [
-  {
-    id: 1,
-    title: "TEDx SVIT 2025",
-    category: "Conference",
-    date: "May 12, 2025",
-    time: "10:00 AM",
-    venue: "SVIT Auditorium, Vasad",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
-    price: "Free",
-    attendees: 320,
-    badge: "Featured",
-  },
-  {
-    id: 2,
-    title: "Startup Pitch Night",
-    category: "Networking",
-    date: "May 18, 2025",
-    time: "6:30 PM",
-    venue: "PDEU Innovation Hub, Gandhinagar",
-    image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80",
-    price: "₹199",
-    attendees: 180,
-    badge: "Hot",
-  },
-  {
-    id: 3,
-    title: "Cultural Fest — Aaveg",
-    category: "Cultural",
-    date: "May 24, 2025",
-    time: "5:00 PM",
-    venue: "LD Engineering College, Ahmedabad",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
-    price: "₹99",
-    attendees: 850,
-    badge: "Selling Fast",
-  },
-  {
-    id: 4,
-    title: "Hackathon 36hrs",
-    category: "Tech",
-    date: "Jun 1, 2025",
-    time: "9:00 AM",
-    venue: "Nirma University, Ahmedabad",
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80",
-    price: "Free",
-    attendees: 240,
-    badge: "New",
-  },
-];
+// const MOCK_EVENTS = [
+//   {
+//     id: 1,
+//     title: "TEDx SVIT 2025",
+//     category: "Conference",
+//     date: "May 12, 2025",
+//     time: "10:00 AM",
+//     venue: "SVIT Auditorium, Vasad",
+//     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
+//     price: "Free",
+//     attendees: 320,
+//     badge: "Featured",
+//   },
+//   {
+//     id: 2,
+//     title: "Startup Pitch Night",
+//     category: "Networking",
+//     date: "May 18, 2025",
+//     time: "6:30 PM",
+//     venue: "PDEU Innovation Hub, Gandhinagar",
+//     image: "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80",
+//     price: "₹199",
+//     attendees: 180,
+//     badge: "Hot",
+//   },
+//   {
+//     id: 3,
+//     title: "Cultural Fest — Aaveg",
+//     category: "Cultural",
+//     date: "May 24, 2025",
+//     time: "5:00 PM",
+//     venue: "LD Engineering College, Ahmedabad",
+//     image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+//     price: "₹99",
+//     attendees: 850,
+//     badge: "Selling Fast",
+//   },
+//   {
+//     id: 4,
+//     title: "Hackathon 36hrs",
+//     category: "Tech",
+//     date: "Jun 1, 2025",
+//     time: "9:00 AM",
+//     venue: "Nirma University, Ahmedabad",
+//     image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&q=80",
+//     price: "Free",
+//     attendees: 240,
+//     badge: "New",
+//   },
+// ];
 
 const CATEGORIES = ["All", "Tech", "Cultural", "Conference", "Networking"];
 
@@ -141,7 +141,7 @@ function EventCard({ event, featured = false }) {
       {/* Image */}
       <div className={`relative overflow-hidden ${featured ? "md:w-1/2 h-52 md:h-auto" : "h-44"}`}>
         <img
-          src={event.image}
+          src={event.thumbnail}
           alt={event.title}
           className={`w-full h-full object-cover transition-transform duration-500
             ${hovered ? "scale-105" : "scale-100"}`}
@@ -155,15 +155,15 @@ function EventCard({ event, featured = false }) {
 
         {/* Price */}
         <span className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full bg-white/90 text-slate-800 backdrop-blur-sm">
-          {event.price}
+          {event.price === 0 ? "Free" : `₹${event.price}`}
         </span>
       </div>
 
       {/* Content */}
       <div className={`flex flex-col justify-between p-4 ${featured ? "md:w-1/2 md:p-6" : "flex-1"}`}>
         <div>
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${categoryColors[event.category] || "bg-slate-100 text-slate-600"}`}>
-            {event.category}
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${categoryColors[event.type] || "bg-slate-100 text-slate-600"}`}>
+            {event.type}
           </span>
 
           <h3 className={`font-bold text-slate-900 mt-3 mb-3 leading-snug group-hover:text-indigo-700 transition-colors
@@ -174,15 +174,23 @@ function EventCard({ event, featured = false }) {
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <CalendarIcon />
-              <span>{event.date} · {event.time}</span>
+              <span>
+                {new Date(event?.date).toLocaleString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <MapPinIcon />
-              <span className="truncate">{event.venue}</span>
+              <span className="truncate">{event.location}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-500">
               <UsersIcon />
-              <span>{event.attendees.toLocaleString()} registered</span>
+              <span>{event.capacity.toLocaleString()} registered</span>
             </div>
           </div>
         </div>
@@ -214,35 +222,38 @@ export default function Hero() {
   const navigate = useNavigate();
 
   const fetchEvents = async () => {
-        try {
-            const response = await getAllEvents();
-            console.log("Response: ", response.data);
+    try {
+        const response = await getAllEvents();
+        // console.log("Response:", response);
 
-            if (response.statusCode === 200) {
-                setEvents(response.data);
-            } else {
-                toast.error(response.message || "Failed to fetch events.");
-            }
-        } catch (error) {
-            toast.error(error.response?.message || "Failed to fetch events.");
+        if (response.statusCode === 200) {
+            const publishedEvents = (response.data || []).filter(
+                (e) => e?.status === "PUBLISHED"
+            );
+
+            setEvents(publishedEvents);
+        } else {
+            toast.error(response.message || "Failed to fetch events.");
         }
-    }
+      } catch (error) {
+          console.error(error);
+          toast.error(error.response?.data?.message || "Failed to fetch events.");
+      }
+    };
 
     useEffect(() => {
         fetchEvents();
     }, []);
-
-    // const MOCK_EVENTS = events;
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(t);
   }, []);
 
-  const filtered = MOCK_EVENTS.filter((e) => {
-    const matchCat = activeCategory === "All" || e.category === activeCategory;
+  const filtered = events.filter((e) => {
+    const matchCat = activeCategory === "All" || e.type === activeCategory;
     const matchSearch = e.title.toLowerCase().includes(search.toLowerCase()) ||
-      e.venue.toLowerCase().includes(search.toLowerCase());
+      e.location.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -264,7 +275,7 @@ export default function Hero() {
                 <div className="flex-1 w-full">
                 <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
                     <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
-                    {MOCK_EVENTS.length} events happening near you
+                    {events.length} events happening near you
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.08] tracking-tight">
@@ -316,37 +327,55 @@ export default function Hero() {
                 {/* RIGHT — featured event showcase */}
                 <div className="w-full lg:w-[480px] shrink-0">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-indigo-100 group">
+                  {events.length > 0 && (
                     <img
-                    src={MOCK_EVENTS[0].image}
-                    alt={MOCK_EVENTS[0].title}
+                    src={events[0].thumbnail}
+                    alt={events[0].title}
                     className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
                     />
+                  )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColors[MOCK_EVENTS[0].badge]}`}>
-                        {MOCK_EVENTS[0].badge}
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${badgeColors[events[0]?.badge]}`}>
+                        {events[0]?.badge}
                     </span>
-                    <h3 className="text-white font-bold text-xl mt-2">{MOCK_EVENTS[0].title}</h3>
+                    <h3 className="text-white font-bold text-xl mt-2">{events[0]?.title}</h3>
                     <div className="flex items-center gap-3 mt-2 text-white/70 text-xs">
-                        <span className="flex items-center gap-1"><CalendarIcon />{MOCK_EVENTS[0].date}</span>
+                        <span className="flex items-center gap-1"><CalendarIcon />
+                          {new Date(events[0]?.date).toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </span>
                         <span>·</span>
-                        <span className="flex items-center gap-1"><MapPinIcon />{MOCK_EVENTS[0].location}</span>
+                        <span className="flex items-center gap-1"><MapPinIcon />{events[0]?.location}</span>
                     </div>
                     </div>
                     <div className="absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full bg-white/90 text-slate-800">
-                    {MOCK_EVENTS[0].price}
+                    {events[0]?.price === 0 ? "Free" : `₹${events[0]?.price}`}
                     </div>
                 </div>
 
                 {/* Mini cards */}
                 <div className="grid grid-cols-3 gap-3 mt-3">
-                    {MOCK_EVENTS.slice(1, 4).map((event) => (
+                    {events.slice(1, 4).map((event) => (
                     <div key={event.id} className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer">
-                        <img src={event.image} alt={event.title} className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <img src={event.thumbnail} alt={event.title} className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-500" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 p-2">
                         <p className="text-white text-xs font-semibold leading-tight line-clamp-2">{event.title}</p>
-                        <p className="text-white/60 text-[10px] mt-0.5">{event.date}</p>
+                        <p className="text-white/60 text-[10px] mt-0.5">
+                          {new Date(event?.date).toLocaleString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </p>
                         </div>
                     </div>
                     ))}
@@ -406,7 +435,7 @@ export default function Hero() {
                ))}
              </div>
              <button
-               onClick={() => navigate("/register?role=organizer")}
+               onClick={() => navigate("/organizer-apply")}
                className="mt-1 flex items-center gap-2 bg-white text-[#6366f1] font-bold text-sm px-6 py-3 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
              >
                Apply now

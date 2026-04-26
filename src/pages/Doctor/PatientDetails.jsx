@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import DoctorList from "./DoctorList";
+import DoctorList from "./OrganizerList";
 import Navbar from "../../components/Navbar";
 import { Footer } from "../../components/Footer";
 import BaseUrl from "../../reusables/BaseUrl";
