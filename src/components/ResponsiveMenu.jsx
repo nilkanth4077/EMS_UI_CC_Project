@@ -49,7 +49,7 @@ const ResponsiveMenu = ({ open }) => {
             USER: [
                 { id: 1, title: "Home", link: "/" },
                 { id: 2, title: "My Events", link: "/my-events" },
-                { id: 3, title: "Contact", link: "/" },
+                { id: 3, title: "Contact", link: "/contact" },
             ],
             ORGANIZER: [
                 { id: 1, title: "Dashboard", link: "/doctor-dashboard" },

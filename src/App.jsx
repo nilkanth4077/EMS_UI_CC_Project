@@ -24,6 +24,7 @@ import OrganizerDashboard from './pages/Organizer/OrganizerDashboard';
 import OrganizerEventDetail from './pages/Organizer/OrganizerEventDetail';
 import ManageEvents from './pages/Admin/ManageEvents';
 import AdminEventDetail from './pages/Admin/AdminEventDetail';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           <Route path='/doc-slot-management' element={<DocSlotManagement />} />
           <Route path='/doc/appointments' element={<BookedSlots />} />
           <Route path='/my-events' element={<MyEvents />} />
+          <Route path='/contact' element={<Contact />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer autoClose={2000} />
